@@ -19,9 +19,7 @@ static uint8_t dec_to_bcd(const uint8_t value) {
 }
 
 bool ds3231_lost_power(void) {
-	struct mgos_i2c *const i2c = mgos_i2c_get_global();
-
-	return (mgos_i2c_read_reg_b(i2c, DS3231_ADDRESS, DS3231_STATUS) >> 7) == 1;
+	return (mgos_i2c_read_reg_b(mgos_i2c_get_global(), DS3231_ADDRESS, DS3231_STATUS) >> 7) == 1;
 }
 
 bool ds3231_get_datetime(struct datetime *const datetime) {
@@ -29,17 +27,15 @@ bool ds3231_get_datetime(struct datetime *const datetime) {
 		return false;
 	}
 
-	struct mgos_i2c *const i2c = mgos_i2c_get_global();
-
 	static const uint8_t data = DS3231_TIME;
 
-	if (!mgos_i2c_write(i2c, DS3231_ADDRESS, &data, sizeof data, true)) {
+	if (!mgos_i2c_write(mgos_i2c_get_global(), DS3231_ADDRESS, &data, sizeof data, true)) {
 		return false;
 	}
 
 	static uint8_t buffer[7];
 
-	if (!mgos_i2c_read(i2c, DS3231_ADDRESS, buffer, sizeof buffer, true)) {
+	if (!mgos_i2c_read(mgos_i2c_get_global(), DS3231_ADDRESS, buffer, sizeof buffer, true)) {
 		return false;
 	}
 
@@ -59,8 +55,6 @@ bool ds3231_set_datetime(const struct datetime *const datetime) {
 		return false;
 	}
 
-	struct mgos_i2c *const i2c = mgos_i2c_get_global();
-
 	static uint8_t buffer[8];
 
 	buffer[0] = DS3231_TIME;
@@ -72,5 +66,5 @@ bool ds3231_set_datetime(const struct datetime *const datetime) {
 	buffer[6] = dec_to_bcd(datetime->month);
 	buffer[7] = dec_to_bcd(datetime->year - 2000);
 
-	return mgos_i2c_write(i2c, DS3231_ADDRESS, &buffer, sizeof buffer, true);
+	return mgos_i2c_write(mgos_i2c_get_global(), DS3231_ADDRESS, &buffer, sizeof buffer, true);
 }
